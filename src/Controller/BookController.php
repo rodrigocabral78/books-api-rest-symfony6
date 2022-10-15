@@ -23,10 +23,18 @@ class BookController extends AbstractController
     #[Route('/books', name: 'books_store', methods: 'POST')]
     public function store(Request $request, BookRepository $bookRepository): JsonResponse
     {
-        if ($request->getContentType() !== 'json') {
-            throw $this->createNotFoundException();
+        if ($request->headers->get('Content-Type') == 'application/json') {
+            $data = $request->toArray();
+        } else {
+            $data = $request->request->all();
         }
-        $data = json_decode($request->getContent(), true);
+        // var_dump($request->headers->get('Content-Type'));
+        // die();
+
+        // if ($request->getContentType() !== 'json') {
+        //     throw $this->createNotFoundException();
+        // }
+        // $data = json_decode($request->getContent(), true);
 
         $book = new Book();
         $book->setTitle($data['title']);
@@ -63,10 +71,18 @@ class BookController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if ($request->getContentType() !== 'json') {
-            throw $this->createNotFoundException();
+        if ($request->headers->get('Content-Type') == 'application/json') {
+            $data = $request->toArray();
+        } else {
+            $data = $request->request->all();
         }
-        $data = json_decode($request->getContent(), true);
+        // var_dump($request->headers->get('Content-Type'));
+        // die();
+
+        // if ($request->getContentType() !== 'json') {
+        //     throw $this->createNotFoundException();
+        // }
+        // $data = json_decode($request->getContent(), true);
 
 
         $book->setTitle($data['title']);
@@ -77,6 +93,26 @@ class BookController extends AbstractController
 
         return $this->json([
             'message' => 'Book updated successfully!',
+            'data' => $book,
+        ]);
+    }
+
+    #[Route('/books/{book}', name: 'books_delete', methods: ['DELETE'])]
+    public function delete(int $book, BookRepository $bookRepository, ManagerRegistry $registry): JsonResponse
+    {
+        $book = $bookRepository->find($book);
+        if (!$book) {
+            throw $this->createNotFoundException();
+        }
+        $bookRepository->remove($book, true);
+
+        // if ($request->getContentType() !== 'json') {
+        //     throw $this->createNotFoundException();
+        // }
+        // $data = json_decode($request->getContent(), true);
+
+        return $this->json([
+            'message' => 'Book deleted successfully!',
             'data' => $book,
         ]);
     }
